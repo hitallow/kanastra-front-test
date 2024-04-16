@@ -1,22 +1,27 @@
+import { FileImport } from "@/models/fileImport";
 import { ReactNode } from "react";
 
-enum FileActionType {}
+export enum FileActionType {
+  loading,
+  endUpload,
+  startLoadFiles,
+  setFiles,
+  appendNewFile,
+}
 
 type ReducerAction<T, P> = {
   type: T;
   payload?: Partial<P>;
 };
 
-
 type FileContextState = {
   isLoading: boolean;
-  file: File | null;
-  fileList: File[]; // & {} You can add more information about the challenge inside this type
+  fileImportList: FileImport[];
 };
 
 type FileAction = ReducerAction<
   FileActionType,
-  Partial<FileContextState>
+  Partial<FileContextState & { file?: FileImport }>
 >;
 
 type FileDispatch = ({ type, payload }: FileAction) => void;
@@ -29,10 +34,10 @@ type FileContextType = {
 type FileProviderProps = { children: ReactNode };
 
 export type {
-  FileActionType,
-  FileContextState,
   FileAction,
-  FileDispatch,
+  FileContextState,
   FileContextType,
-  FileProviderProps,
-}
+  FileDispatch,
+  FileProviderProps
+};
+

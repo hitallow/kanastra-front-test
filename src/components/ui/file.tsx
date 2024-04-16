@@ -1,38 +1,15 @@
-import { ReactNode, createContext, useContext, useReducer } from "react";
-
-export enum FileActionType {
-  startUploadFile,
-  endUpload,
-}
-
-type ReducerAction<T, P> = {
-  type: T;
-  payload?: Partial<P>;
-};
-
-type FileContextState = {
-  isLoading: boolean;
-  file: File | null;
-  fileList: File[]; // & {} You can add more information about the challenge inside this type
-};
-
-export type FileAction = ReducerAction<
+import {
+  FileAction,
   FileActionType,
-  Partial<FileContextState>
->;
-
-type FileDispatch = ({ type, payload }: FileAction) => void;
-
-type FileContextType = {
-  state: FileContextState;
-  dispatch: FileDispatch;
-};
-
-type FileProviderProps = { children: ReactNode };
+  FileContextState,
+  FileContextType,
+  FileProviderProps,
+} from "@/types";
+import { createContext, useContext, useReducer } from "react";
 
 export const FileContextInitialValues: Partial<FileContextState> = {
-  file: {} as File,
   isLoading: false,
+  fileImportList: [],
 };
 
 const FileContext = createContext({} as FileContextType);
@@ -42,19 +19,32 @@ const FileReducer = (
   action: FileAction
 ): FileContextState => {
   switch (action.type) {
-    case FileActionType.startUploadFile: {
+    case FileActionType.loading: {
       return {
-        isLoading: true,
-        file: null,
-        fileList: [],
+        ...state,
+        isLoading: action.payload?.isLoading || false,
       };
     }
 
-    case FileActionType.endUpload: {
+    case FileActionType.appendNewFile: {
+      const fileImportList = [...state.fileImportList];
+
+      if (action.payload?.file) {
+        fileImportList.push(action.payload?.file);
+      }
+
       return {
+        ...state,
         isLoading: false,
-        file: state.file,
-        fileList: [],
+        fileImportList,
+      };
+    }
+
+    case FileActionType.setFiles: {
+      return {
+        ...state,
+        isLoading: false,
+        fileImportList: action.payload?.fileImportList || [],
       };
     }
 
