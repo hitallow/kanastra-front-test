@@ -13,6 +13,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         <Routes>
           <Route path="/" element={<Components.Layout />}>
             <Route path="" index element={<Pages.Welcome />} />
+            <Route path="/boletos" element={<Pages.ListBoletos />} />
             <Route path="/imports" element={<Pages.ListFileImports />} />
             <Route path="/import-new-file" element={<Pages.ImportFile />} />
             <Route path="*" element={<Components.NoMatch />} />
