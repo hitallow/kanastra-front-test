@@ -7,24 +7,49 @@ import {
   TableHeader,
   TableRow,
 } from "@/components";
+import { useFileContext } from "@/components/ui/file";
 import { timestempToDate } from "@/helpers/date";
 import { FileImportService } from "@/lib/services/file-import-service";
-import { FileImport } from "@/models/fileImport";
+import { FileActionType } from "@/types";
 import { ReactElement, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 
 function ListFileImports(): ReactElement {
-  const [files, setFiles] = useState<FileImport[]>([]);
   const [totalItems, setTotalItems] = useState<number>(-1);
+
+  const { state, dispatch } = useFileContext();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await FileImportService.loadAll();
-        setFiles(data.fileImports);
-        setTotalItems(data.totalItems);
+        console.log(state.fileImportList)
+        if (!state.fileImportList.length) {
+          console.log('oi')
+          dispatch({
+            type: FileActionType.loading,
+            payload: {
+              isLoading: true,
+            },
+          });
+          const { fileImports, totalItems } = await FileImportService.loadAll();
+
+          dispatch({
+            type: FileActionType.setFiles,
+            payload: {
+              fileImportList: fileImports,
+            },
+          });
+          // setFiles(data.fileImports);
+          setTotalItems(totalItems);
+        }
       } catch (error) {
         alert("erro ao tentar carregar importações");
+      } finally {
+        dispatch({
+          type: FileActionType.loading,
+          payload: {
+            isLoading: false,
+          },
+        });
       }
     };
     fetchData();
@@ -32,19 +57,9 @@ function ListFileImports(): ReactElement {
 
   return (
     <div>
-      <div className="flex w-100 justify-between">
-        <h2 className="text-2xl font-semibold leading-tight">
-          Listagem de arquivos
-        </h2>
-        <Link to={"/import"}>
-          <button
-            type="button"
-            className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-          >
-            Importar novo arquivo
-          </button>
-        </Link>
-      </div>
+      <h2 className="text-2xl font-semibold leading-tight">
+        Listagem de arquivos
+      </h2>
 
       <div className="inline-block min-w-full shadow-md rounded-lg overflow-hidden mt-3">
         <Table>
@@ -58,7 +73,7 @@ function ListFileImports(): ReactElement {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {files.map((file) => (
+            {state.fileImportList.map((file) => (
               <TableRow key={file.id}>
                 <TableCell>{file.id}</TableCell>
                 <TableCell>{file.title}</TableCell>
