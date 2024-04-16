@@ -7,23 +7,36 @@ import {
   TableHeader,
   TableRow,
 } from "@/components";
+import { useFileContext } from "@/components/ui/file";
 import { timestempToDate } from "@/helpers/date";
 import { BoletoService } from "@/lib/services/boleto-service";
 import { Boleto } from "@/models/boleto";
+import { FileActionType } from "@/types";
 import { ReactElement, useEffect, useState } from "react";
 
 export const ListBoletos = (): ReactElement => {
   const [boletos, setBoletos] = useState<Boleto[]>([]);
   const [totalItems, setTotalItems] = useState<number>(-1);
 
+  const { dispatch } = useFileContext();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
+        dispatch({
+          type: FileActionType.loading,
+          payload: { isLoading: true },
+        });
         const data = await BoletoService.loadAll(10, 0);
         setBoletos(data.boletos);
         setTotalItems(data.totalItems);
       } catch (error) {
         alert("erro ao tentar carregar importações");
+      }finally {
+        dispatch({
+          type: FileActionType.loading,
+          payload: { isLoading: false },
+        });
       }
     };
     fetchData();
