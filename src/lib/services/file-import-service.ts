@@ -19,6 +19,8 @@ export class FileImportService {
       headers: { "Content-Type": "multipart/form-data;" },
     });
 
-    return response.data as FileImport;
+    const { fileImport } = response.data;
+
+    return fileImport as FileImport;
   }
 }
